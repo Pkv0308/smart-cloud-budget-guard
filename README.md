@@ -33,9 +33,9 @@ Unlike standard financial summary dashboards that just report costs after the fa
 
 | Category | Technologies |
 | :--- | :--- |
-| **Backend** | 🐍 Python (Flask / FastAPI), Azure SDK / Boto3, Background Schedulers |
-| **Frontend** | 🎨 Streamlit (Prototype) / React (Full-stack) |
-| **Database** | 🗄️ SQLite (Local dev) / PostgreSQL (Robust deployment) |
+| **Backend** | 🐍 Python (Flask / FastAPI), Azure SDK, Background Schedulers |
+| **Frontend** | 🎨 React  |
+| **Database** | 🗄️ PostgreSQL (Robust deployment) |
 
 ### ⚙️ Cloud Services
 - 🖥️ **Azure Virtual Machines**
@@ -46,7 +46,7 @@ Unlike standard financial summary dashboards that just report costs after the fa
 ### 💻 Development Tools
 - **IDE:** VS Code
 - **Version Control:** Git & GitHub
-- **API Testing:** Postman / Thunder Client
+- **API Testing:** Postman 
 
 ---
 *Built to keep the cloud affordable! ☁️💸*
