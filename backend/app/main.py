@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.vms import router as vms_router
+from backend.app.vms import router as vms_router
 
 app=FastAPI(
     title="Smart Budget Guard",
