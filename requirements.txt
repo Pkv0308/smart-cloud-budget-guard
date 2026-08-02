@@ -13,7 +13,8 @@ azure-mgmt-monitor==6.0.2
 
 # --- Database (PostgreSQL via sync SQLAlchemy) ---
 SQLAlchemy==2.0.36
-psycopg2-binary==2.9.10
+psycopg-binary==3.3.4
+psycopg==3.3.4
 
 # --- Scheduler (in-process, no external infra) ---
 APScheduler==3.11.0

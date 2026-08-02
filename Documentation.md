@@ -31,19 +31,8 @@ as a session log — one dated entry per work session, describing what was done.
 - Updated module imports in `vms.py`.
 - `vms.py` now returns current VM data as JSON.
 
-<!-- ### 2 August 2026
-**Summary:** Project structure verified end-to-end; skeleton confirmed stable; core documents finalized.
-- Verified the full project tree (`backend/app/` containing `main.py`, `vms.py`,
-  `__init__.py`; `scripts/` containing `list_vms.py`).
-- Confirmed that `from backend.app.vms import router` and
-  `from scripts.list_vms import list_vms_data` resolve correctly when `uvicorn`
-  is run from the project root — no import fix was needed.
-- Noted `scripts/` is missing an `__init__.py`; works via CWD-based path
-  resolution but should be added for explicitness.
-- Finalized `README.md`: single tech-stack decision per layer, MVP scope only.
-- Finalized `developmentPlan.md`: 11-week plan broken into daily 2-hour sessions
-  (paced for ~2 hours/day), with an explicit scope-cut order if behind schedule.
-- Finalized `requirements.txt`: trimmed to MVP dependencies (FastAPI, Azure SDK,
-  SQLAlchemy + psycopg2, APScheduler, python-dotenv); testing and config-management
-  packages deferred to the weeks that actually need them.
-- **Week 1 checkpoint reached.** Ready to begin Week 2 (PostgreSQL persistence). -->
+### 2 August 2026
+**Summary:** PostgreSQL installation and schema applied, Updated DB driver due to python 3.14 incompatibility
+- Installed Postgres, created database and table successfully
+- switched from psycopg2-binary to psycopg(v3) due to python3.14 incompatibility
+- confirmed successful database conenction

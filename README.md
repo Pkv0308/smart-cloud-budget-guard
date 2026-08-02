@@ -31,7 +31,7 @@ Users frequently spin up cloud VMs for testing and forget to shut them down. **S
 | **Backend framework** | FastAPI (Python 3.11+) |
 | **Azure SDK** | `azure-identity`, `azure-mgmt-compute`, `azure-mgmt-monitor` |
 | **Authentication** | `DefaultAzureCredential` via Azure CLI login |
-| **Database** | PostgreSQL, accessed via SQLAlchemy (sync) + psycopg2-binary |
+| **Database** | PostgreSQL, accessed via SQLAlchemy (sync) + psycopg-binary |
 | **Schema management** | Plain SQL in `docs/db_schema.sql`, applied manually |
 | **Scheduler** | APScheduler (in-process `BackgroundScheduler`) |
 | **Frontend** | React + Vite, Recharts for charts |
