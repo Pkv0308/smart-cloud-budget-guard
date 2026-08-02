@@ -1,52 +1,56 @@
 # 🛡️ Smart Cloud Budget Guard
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Azure](https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Status](https://img.shields.io/badge/Status-In_Development-yellow?style=for-the-badge)
 
-> A smart, cloud-based preventive assistant designed to help students, academic labs, and small development teams eliminate unnecessary cloud waste.
+> A preventive assistant that helps students, academic labs, and small dev teams stop wasting money on forgotten Azure VMs.
 
 ## 📖 Project Description
 
-**Smart Budget Guard** tackles a practical and expensive cloud problem: forgotten test or development resources. Users frequently spin up VMs and forget to shut them down, leading to avoidable costs. 
-
-Unlike standard financial summary dashboards that just report costs after the fact, Smart Budget Guard acts as a **preventive assistant**. By combining budget thresholds with resource behavior (like low CPU activity and specific resource tags), it identifies non-critical resources and either safely recommends them for shutdown or automatically stops them.
+Users frequently spin up cloud VMs for testing and forget to shut them down. **Smart Budget Guard** doesn't just report cost after the fact — it watches VM activity and budget thresholds together, flags idle non-critical resources, and can safely recommend or execute a shutdown.
 
 ---
 
 ## 🎯 Objectives
 
-- 🔍 **Monitor & Track:** Build a cloud-connected system to monitor compute resources and spending behavior.
-- 💤 **Detect Idle Resources:** Identify idle virtual machines using utilization metrics (e.g., CPU activity).
-- 💰 **Budget Management:** Enable users to define monthly budgets and warning thresholds.
-- 🚨 **Proactive Alerts:** Generate real-time alerts when usage or spending approaches configured limits.
-- 🤖 **Safe Automation:** Provide automated controls, such as stopping tagged dev VMs during off-hours or after prolonged inactivity.
+- 🔍 **Monitor & Track** — inventory Azure VMs and persist their state.
+- 💤 **Detect Idle Resources** — flag low-CPU/low-network VMs using Azure Monitor metrics.
+- 💰 **Budget Management** — let users define monthly budgets and warning thresholds.
+- 🚨 **Proactive Alerts** — raise alerts when idle resources or spend cross limits.
+- 🤖 **Safe Automation** — stop tagged, non-production dev VMs, with dry-run support and full logging.
 
 ---
 
-## 🛠️ Tools and Technologies
+## 🛠️ Tech Stack
 
-### ☁️ Cloud Platform
-**Microsoft Azure** is the primary platform of choice. Azure provides excellent documentation for auto-shutdown scheduling, alert-driven VM automation, and cost alert workflows in a direct, student-friendly way.
+| Layer | Technology |
+|---|---|
+| **Backend framework** | FastAPI (Python 3.11+) |
+| **Azure SDK** | `azure-identity`, `azure-mgmt-compute`, `azure-mgmt-monitor` |
+| **Authentication** | `DefaultAzureCredential` via Azure CLI login |
+| **Database** | PostgreSQL, accessed via SQLAlchemy (sync) + psycopg2-binary |
+| **Schema management** | Plain SQL in `docs/db_schema.sql`, applied manually |
+| **Scheduler** | APScheduler (in-process `BackgroundScheduler`) |
+| **Frontend** | React + Vite, Recharts for charts |
 
-### 🧰 Tech Stack
+---
 
-| Category | Technologies |
-| :--- | :--- |
-| **Backend** | 🐍 Python (Flask / FastAPI), Azure SDK, Background Schedulers |
-| **Frontend** | 🎨 React  |
-| **Database** | 🗄️ PostgreSQL (Robust deployment) |
+## ☁️ Azure Services Used
 
-### ⚙️ Cloud Services
-- 🖥️ **Azure Virtual Machines**
-- 📊 **Azure Monitor** (Metric alerts)
-- ⚡ **Azure Automation / Logic Apps** (Controlled actions)
-- 💵 **Azure Cost Management** (Budget & spending reference)
+- 🖥️ **Azure Virtual Machines** — inventory + power state
+- 📊 **Azure Monitor** — CPU / network metrics for idle detection
+- 💵 Cost data — mocked in-app (VM size × stopped hours × hourly rate)
 
-### 💻 Development Tools
+---
+
+## 💻 Development Tools
+
 - **IDE:** VS Code
 - **Version Control:** Git & GitHub
-- **API Testing:** Postman 
+- **API Testing:** Postman
 
 ---
 *Built to keep the cloud affordable! ☁️💸*
