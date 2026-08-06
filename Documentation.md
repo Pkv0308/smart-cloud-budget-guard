@@ -36,3 +36,12 @@ as a session log — one dated entry per work session, describing what was done.
 - Installed Postgres, created database and table successfully
 - switched from psycopg2-binary to psycopg(v3) due to python3.14 incompatibility
 - confirmed successful database conenction
+
+### 6 August 2026
+**Summary:** Resources model and inventory upsert logic written and tested
+- defined the Resource SQLAlchemy model
+- implemented resource upsert logic, updates on conflict
+- tested the upsert script against real Azure data
+- update logic for "VM Deallocated" state
+- added /sync route that fetches data from Azure and upserts into DB
+- added /vms/inventory that returns persisted data from DB

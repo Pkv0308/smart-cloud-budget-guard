@@ -1,4 +1,4 @@
-create table resouces(
+create table resources(
     id serial primary key,
     vm_name varchar(255) not null,
     location varchar(100),

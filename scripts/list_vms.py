@@ -82,12 +82,14 @@ def list_vms_data() -> dict:
 
         key = (project, owner, env)
         if key not in summary:
-            summary[key] = {"running": 0, "stopped": 0, "unknown": 0, "error": 0}
+            summary[key] = {"running": 0, "stopped": 0, "deallocated":0, "unknown": 0, "error": 0}
         ps_lower = power_state.lower()
         if ps_lower.startswith("vm running"):
             summary[key]["running"] += 1
         elif ps_lower.startswith("vm stopped"):
             summary[key]["stopped"] += 1
+        elif ps_lower.startswith("vm deallocated"):
+            summary[key]["deallocated"] += 1
         elif ps_lower == "error":
             summary[key]["error"] += 1
         else:
