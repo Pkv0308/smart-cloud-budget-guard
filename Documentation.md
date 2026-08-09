@@ -45,3 +45,11 @@ as a session log — one dated entry per work session, describing what was done.
 - update logic for "VM Deallocated" state
 - added /sync route that fetches data from Azure and upserts into DB
 - added /vms/inventory that returns persisted data from DB
+
+### 9 August 2026
+**Summary:** scripted VM Metric (Percentage CPU) collection, added persistence of Azure resource id into resources
+
+- added vm_metrics table in schema and Metric model in models
+- added resource_id to Resources and updated across list_vms, models, vm_inventory
+- scripted metrics.py to get average CPU utilization percentage over the last hour
+- tested metrics against deallocated VM and running VM

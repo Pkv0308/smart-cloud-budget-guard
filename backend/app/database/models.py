@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime,Numeric,BigInteger
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from backend.app.database import Base
@@ -7,6 +7,7 @@ class Resource(Base):
     __tablename__ = "resources"
     id=Column(Integer, primary_key=True, index=True)
     vm_name=Column(String(255),nullable=False,unique=True)
+    resource_id=Column(String(500))
     location=Column(String(100))
     power_state=Column(String(50))
     environment=Column(String(100))
@@ -14,4 +15,12 @@ class Resource(Base):
     project=Column(String(100))
     tags=Column(JSONB)
     last_synced_at=Column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now())
-    
+
+class Metric(Base):
+    __tablename__="vm_metrics"
+    id=Column(Integer,primary_key=True,index=True)
+    vm_name=Column(String(255),nullable=False)
+    cpu_percent=Column(Numeric(5,2))
+    network_in_bytes=Column(BigInteger)
+    network_out_bytes=Column(BigInteger)
+    recorded_at=Column(DateTime(timezone=True),server_default=func.now())
