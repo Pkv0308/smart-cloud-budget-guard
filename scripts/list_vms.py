@@ -72,6 +72,7 @@ def list_vms_data() -> dict:
         env = tags.get("Environment", "Unknown")
 
         item = {
+            "id":vm.id,
             "name": vm.name,
             "location": vm.location,
             "power_state": power_state,

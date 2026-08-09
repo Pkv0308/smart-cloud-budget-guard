@@ -18,6 +18,7 @@ def upsert_resources(vm_items: list[dict])->int:
         for vm in vm_items:
             tags=vm.get("tags",{})
             stmt=insert(Resource).values(
+                resource_id=vm["id"],
                 vm_name=vm["name"],
                 location=vm["location"],
                 power_state=vm["power_state"],
@@ -29,6 +30,7 @@ def upsert_resources(vm_items: list[dict])->int:
             stmt=stmt.on_conflict_do_update(
                 index_elements=["vm_name"],
                 set_={
+                    "resource_id":stmt.excluded.resource_id,
                     "location":stmt.excluded.location,
                     "power_state":stmt.excluded.power_state,
                     "environment":stmt.excluded.environment,
@@ -51,7 +53,7 @@ def get_all_resources()->list[dict]:
     try:
         rows=db.execute(select(Resource)).scalars().all()
         return [
-            {
+            {   "resource_id":r.resource_id,
                 "vm_name":r.vm_name,
                 "vm_location":r.location,
                 "power_state":r.power_state,
