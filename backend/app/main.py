@@ -1,12 +1,16 @@
 from fastapi import FastAPI
-
 from backend.app.vms import router as vms_router
+from backend.app.services.scheduler import start_scheduler
 
 app=FastAPI(
     title="Smart Budget Guard",
     description="Azure Cloud Cost Optimization - Preventive budget guard for dev VMs",
     version="0.1.0"
 )
+
+@app.on_event("startup")
+def on_startup():
+    start_scheduler()
 
 @app.get("/")
 

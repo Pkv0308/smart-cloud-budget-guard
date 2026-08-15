@@ -53,3 +53,21 @@ as a session log — one dated entry per work session, describing what was done.
 - added resource_id to Resources and updated across list_vms, models, vm_inventory
 - scripted metrics.py to get average CPU utilization percentage over the last hour
 - tested metrics against deallocated VM and running VM
+
+### 13 Auguest 2026
+**Summary:** Added network metric collection, persisted metric data (CPU +  network in/out) to DB
+
+- udpated metrics.py to return VM network usage
+- tested and verified network functionality againt live VM, returning network in/out bytes
+- added metrics persistence mechanism, stores a row per VM
+- tested and verified per VM metric persistence into the DB
+
+
+### 15 August 2026 - Happy Independence Day
+**Summary:** implemented scheduler to retrieve hourly VM metrics, idle detection rule implemented and confirmed working
+
+- implemented start_scheduler() into FastAPI's startup event
+- collect_and_store_metrics() now runs hourly when the backend is on
+- scheduler confirmed working at regular intervals (tested for per minute retrieval)
+- scripted get_idle_vms() that returns idle VMs from last 2 hours with conditions CPU<5% and network<1KB
+- tested and verified idle VM retrieval by inserting sample data
