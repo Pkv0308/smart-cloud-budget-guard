@@ -1,6 +1,10 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from backend.app.services.metrics import collect_and_store_metrics
 from datetime import datetime
+import logging
+
+logging.basicConfig()
+logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 scheduler=BackgroundScheduler()
 

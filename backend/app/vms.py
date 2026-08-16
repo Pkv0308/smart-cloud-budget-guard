@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from scripts.list_vms import list_vms_data
 from backend.app. services.vm_inventory import upsert_resources,get_all_resources
+from backend.app.services.metrics import get_idle_vms
 
 router = APIRouter(prefix="/vms",tags=["vms"])
 
@@ -21,3 +22,8 @@ def sync_vms_route():
 def get_inventory_route():
     """Returns persisted VM data from the database"""
     return get_all_resources()
+
+@router.get("/idle")
+def get_idle_vms_route():
+    """Return VM names currently flagged as idle"""
+    return {"idle_vms": get_idle_vms()}

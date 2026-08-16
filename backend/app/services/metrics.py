@@ -113,8 +113,11 @@ def get_idle_vms() -> list[str]:
         for vm_name, metrics in by_vm.items():
             if len(metrics)<2:
                 continue
+            NETWORK_THRESHOLD_BYTES_PER_SEC = 5*1024
+            COLLECTION_INTERVAL_SECONDS = 3600  # matches the scheduler's hourly interval
+            network_threshold = NETWORK_THRESHOLD_BYTES_PER_SEC * COLLECTION_INTERVAL_SECONDS
             all_below_threshold=all(
-                (m.cpu_percent is not None and m.cpu_percent<5.0) and ((m.network_in_bytes or 0) + (m.network_out_bytes or 0))<1024
+                (m.cpu_percent is not None and m.cpu_percent<5.0) and ((m.network_in_bytes or 0) + (m.network_out_bytes or 0))<network_threshold
                 for m in metrics
             )
 
