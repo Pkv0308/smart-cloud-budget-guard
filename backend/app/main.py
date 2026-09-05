@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from backend.app.vms import router as vms_router
 from backend.app.services.scheduler import start_scheduler, scheduler
 from contextlib import asynccontextmanager
+from backend.app.budgets import router as budgets_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,3 +28,4 @@ def health()->dict[str,str]:
     return {"status":"ok"}
 
 app.include_router(vms_router)
+app.include_router(budgets_router)

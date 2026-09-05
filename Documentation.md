@@ -95,3 +95,26 @@ as a session log — one dated entry per work session, describing what was done.
 - network threshold was previously compared against hourly total, corrected by scaling to per second rates
 - tuned threshold to CPU<5% and network<5KB/s (an entirely idle Azure VM takes around 1.75KB/s which was not categorized as idle)
 - confirmed the working of new thresholds
+
+### 4 September 2026
+
+**Summary:** implemented the budget engine using mock pricing and thresholds
+
+- added `budgets` table to `db_schema.sql` and `Budget` model to `models.py`
+- wrote `backend/app/services/budgets.py` with `create_budget()` and `get_all_budgets()`
+- added `backend/app/budgets.py` router with `POST /budgets/` and `GET /budgets/`, registered in main.py
+- created and retrieved a budget successfully
+- hardcoded `VM_HOURLY_RATES` mock rate table with a fallback mechanism
+- added `vm_size` column to `resources` and updated `list_vms, vm_inventory and models`
+- confirmed vm_size persists in database
+
+### 5 September 2026
+
+**Summary:** implemented budget update mechanism and mock spend estimation with budget state
+
+- added `update_budget()` to `budgets.py1` and `PUT /bugets/{id}` route
+- tested and verified updating monthly limit on an existing budget
+- implemented `estimate_monthly_spend()` that estimates monthly spend for a running VM (assumes continuous runtime since day 1 of month; `not real billing`)
+- categorized budget spend using `get_budget_state` based on spend-to-limit ratio
+- added `get_spend_summary` that summarize budgets across VMs
+- implemented `GET /budgets/spend` route, tested and verified

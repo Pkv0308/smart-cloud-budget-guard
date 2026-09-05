@@ -20,6 +20,17 @@ create table if not exists vm_metrics(
     recorded_at timestamp default now()
 );
 
--- -- storing VM Azure resouce id for persisting monitoring data
+-- storing VM Azure resouce id for persisting monitoring data
 
 -- alter table resources add column resource_id varchar(500);
+
+create table if not exists budgets(
+    id serial primary key,
+    project varchar(100) not null,
+    monthly_limit numeric(10,2) not null,
+    warning_threshold_percent numeric(5,2) default 75.0,
+    critical_threshold_percent numeric(5,2) default 90.0,
+    created_at timestamp default now()
+);
+
+-- alter table resources add column vm_size varchar(100);

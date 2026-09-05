@@ -76,6 +76,7 @@ def list_vms_data() -> dict:
             "name": vm.name,
             "location": vm.location,
             "power_state": power_state,
+            "vm_size":vm.hardware_profile.vm_size,
             "tags": tags,
         }
 
