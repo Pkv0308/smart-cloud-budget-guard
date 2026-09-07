@@ -1,7 +1,8 @@
 from datetime import datetime
 from backend.app.database import SessionLocal
 from backend.app.database.models import Resource
-from backend.app.budgets import get_all_budgets
+from backend.app.services.budgets import get_all_budgets
+
 # Mock hourly rates (USD) — approximate Azure pay-as-you-go pricing.
 # Not live pricing; sufficient for the MVP's cost estimation.
 VM_HOURLY_RATES={

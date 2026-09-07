@@ -118,3 +118,14 @@ as a session log — one dated entry per work session, describing what was done.
 - categorized budget spend using `get_budget_state` based on spend-to-limit ratio
 - added `get_spend_summary` that summarize budgets across VMs
 - implemented `GET /budgets/spend` route, tested and verified
+
+### 7 September 2026
+
+**Summary:** implemented alert system for idle VMs and budget threshold
+
+- added `alerts` table and the `Alerts` model
+- wrote `backend/app/services/alerts.py`
+- implemented alert creation functionality: manual, idle VMs and budget states
+- tested and verified alert creation of idle VMs and budget overflow
+- alert listing and acknowledge endpoints added
+- testing alert listing, acknowledged filtering (false and true)
