@@ -129,3 +129,23 @@ as a session log — one dated entry per work session, describing what was done.
 - tested and verified alert creation of idle VMs and budget overflow
 - alert listing and acknowledge endpoints added
 - testing alert listing, acknowledged filtering (false and true)
+
+### 19 September 2026
+
+**Summary** implemented notification functionality, recommendations, automation
+
+- added console/log notification mechanism so every new alert (idle or buidget) triggers a notification automatically
+- created recommendations and automation_logs tables and models
+- implemented safety mechanism to identify VM for automation eligible, tested and verified
+- gathers automation eligible VM and persists into database preventing duplicates
+
+### 20 September 2026
+
+**Summary:** recommend and logs endpoint added; implented dry-run functionality
+
+- updated automation to write an automation log every time a VM is recommended, creating a full audit trail
+- added automation router with POST and GET requests
+- tested and verified these endpoints
+- implemented dry-run functionality for VM termination, validates eligibility at execution time
+- added POST dry-run endpoint
+- tested and verified dry-run funtionality

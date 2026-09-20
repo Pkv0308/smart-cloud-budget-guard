@@ -45,3 +45,24 @@ class Alert(Base):
     message=Column(Text, nullable=False)
     acknowledged=Column(Boolean,default=False)
     created_at=Column(DateTime(timezone=True),server_default=func.now())
+
+class Recommendation(Base):
+    __tablename__="recommendations"
+
+    id=Column(Integer, primary_key=True, index=True)
+    vm_name=Column(String(255),nullable=False)
+    reason=Column(Text, nullable=False)
+    status=Column(String(20),default="pending")
+    created_at=Column(DateTime(timezone=True),server_default=func.now())
+
+class AutomationLog(Base):
+    __tablename__="automation_logs"
+
+    id=Column(Integer,primary_key=True,index=True)
+    vm_name=Column(String(255),nullable=False)
+    action=Column(String(50),nullable=False)
+    dry_run=Column(Boolean,nullable=False)
+    result=Column(String(20),nullable=False)
+    detail=Column(Text)
+    created_at=Column(DateTime(timezone=True),server_default=func.now())
+    

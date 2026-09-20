@@ -10,7 +10,8 @@ create table
         project varchar(100),
         tags JSONB,
         last_synced_at timestamp default now (),
-        unique (vm_name) resource_id varchar(500)
+        unique (vm_name),
+        resource_id varchar(500)
     );
 
 create table
@@ -34,7 +35,7 @@ create table
     );
 
 create table
-    alerts (
+    if not exists alerts (
         id serial primary key,
         alert_type varchar(50) not null,
         vm_name varchar(255),
@@ -43,4 +44,24 @@ create table
         message text not null,
         acknowledged boolean default FALSE,
         created_at timestamp default now ()
-    )
+    );
+
+create table
+    if not exists recommendations(
+    id serial primary key,
+    vm_name varchar(255) not null,
+    reason text not null,
+    status varchar(20) default 'pending',
+    created_at timestamp default now()
+);
+
+create table 
+    if not exists automation_logs(
+        id serial primary key,
+        vm_name varchar(255) not null,
+        action varchar(50) not null,
+        dry_run boolean not null,
+        result varchar(20) not null,
+        detail text,
+        created_at timestamp default now()
+    );

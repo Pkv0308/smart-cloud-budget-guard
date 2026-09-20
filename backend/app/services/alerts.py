@@ -2,6 +2,7 @@ from backend.app.database.models import Alert
 from backend.app.database import SessionLocal
 from backend.app.services.metrics import get_idle_vms
 from backend.app.services.cost_estimator import get_spend_summary
+from backend.app.services.notifications import notify
 
 def create_alert(alert_type:str, severity:str, message:str, vm_name:str = None, budget_id:int = None)->dict:
     db=SessionLocal()
@@ -16,6 +17,7 @@ def create_alert(alert_type:str, severity:str, message:str, vm_name:str = None, 
         db.add(alert)
         db.commit()
         db.refresh(alert)
+        notify(message,severity)
         return{
             "id":alert.id,
             "alert_type":alert.alert_type,
