@@ -149,3 +149,13 @@ as a session log — one dated entry per work session, describing what was done.
 - implemented dry-run functionality for VM termination, validates eligibility at execution time
 - added POST dry-run endpoint
 - tested and verified dry-run funtionality
+
+### 5 October 2026
+
+**Summary:** implemented frontend MVP
+
+- Scaffolded a React + Vite frontend in `frontend/`, connected to the FastAPI backend (CORS enabled).
+- Added a central API client wrapping every backend endpoint.
+- **VMs page:** persisted inventory with power state, tags, and an idle indicator, filterable by environment, auto-shutdown, and idle state.
+- **Overview page:** alert counts (active, critical, warning, acknowledged) and budget cards showing spend against limit.
+- Alerts and Automation pages are placeholders, planned for Week 8.

@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from backend.app.budgets import router as budgets_router
 from backend.app.alerts import router as alerts_router
 from backend.app.automation import router as automation_router
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,7 +21,12 @@ app=FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 def root() -> dict[str,str]:
     return {"service":"Smart Budget Guard","status":"running"}
