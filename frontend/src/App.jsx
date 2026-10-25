@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Overview from "./pages/Overview";
 import VMs from "./pages/VMs";
+import Alerts from "./pages/Alerts";
+import Automation from "./pages/Automation";
 
 const TABS = ["Overview", "VMs", "Alerts", "Automation"];
 
@@ -27,9 +29,8 @@ function App() {
       <main className="page">
         {tab === "Overview" && <Overview />}
         {tab === "VMs" && <VMs />}
-        {(tab === "Alerts" || tab === "Automation") && (
-          <p className="muted">{tab} page coming soon.</p>
-        )}
+        {tab === "Alerts" && <Alerts />}
+        {tab === "Automation" && <Automation />}
       </main>
     </>
   );

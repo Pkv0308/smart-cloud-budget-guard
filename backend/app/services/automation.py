@@ -31,7 +31,7 @@ def recommend()->list[dict]:
     try:
         idle_vms=get_idle_vms()
         if not idle_vms:
-            return
+            return []
         resources=db.query(Resource).filter(Resource.vm_name.in_(idle_vms)).all()
         results=[]
 
@@ -168,5 +168,25 @@ def run_automation(vm_name:str, dry_run:bool = True) ->dict:
             "detail":detail
         }
 
+    finally:
+        db.close()
+
+def get_recommendations(status: str = None) -> list[dict]:
+    db = SessionLocal()
+    try:
+        query = db.query(Recommendation)
+        if status:
+            query = query.filter(Recommendation.status == status)
+        recs = query.order_by(Recommendation.created_at.desc()).all()
+        return [
+            {
+                "id": r.id,
+                "vm_name": r.vm_name,
+                "reason": r.reason,
+                "status": r.status,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in recs
+        ]
     finally:
         db.close()

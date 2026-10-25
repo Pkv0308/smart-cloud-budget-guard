@@ -159,3 +159,16 @@ as a session log — one dated entry per work session, describing what was done.
 - **VMs page:** persisted inventory with power state, tags, and an idle indicator, filterable by environment, auto-shutdown, and idle state.
 - **Overview page:** alert counts (active, critical, warning, acknowledged) and budget cards showing spend against limit.
 - Alerts and Automation pages are placeholders, planned for Week 8.
+
+### 25 October 2026 
+
+**Summary:** Frontend completed (Alerts page, Automation page, charts, loading and error handling) and the scheduler now runs the full monitoring cycle. Week 8 checkpoint met.
+
+- Built the Alerts page (`Alerts.jsx`)
+- Built the Automation page (`Automation.jsx`)
+- Added `GET /automation/recommendations`  and `getRecommendations` in `api.js`
+- Fixed a bug where `POST /automation/recommend` returned `null` when no VMs were idle, which crashed the page. Every code path now returns a list.
+- Added Overview charts with Recharts (`components/Charts.jsx`): VMs by state and spend vs limit
+- Made loading and error handling consistent across all four pages: friendlier API errors
+- Replaced the hourly scheduled job with `run_monitoring_cycle()` (collect metrics, idle alerts, budget alerts, recommendations)
+- Confirmed the scheduler: metric collection fails for the deleted VM (expected), but the remaining steps still ran and an idle alert was created from test metric rows without any manual call.

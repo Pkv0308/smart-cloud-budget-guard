@@ -1,6 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../api";
+import { useLoader } from "../hooks/useLoader";
+import { Loading, ErrorBox } from "../Components/Status";
 
+const fetchVms = () =>
+  Promise.all([api.getInventory(), api.getIdleVms()]).then(([vms, idle]) => ({
+    vms,
+    idleNames: new Set(idle.idle_vms),
+  }));
 function powerClass(state) {
   return state && state.toLowerCase().includes("running") ? "running" : "stopped";
 }
@@ -10,32 +17,21 @@ function autoShutdownOn(vm) {
 }
 
 function VMs() {
-  const [vms, setVms] = useState([]);
-  const [idleNames, setIdleNames] = useState(new Set());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading, error, retry } = useLoader(fetchVms);
+  const vms = data?.vms ?? [];
+  const idleNames = data?.idleNames ?? new Set();
 
   const [envFilter, setEnvFilter] = useState("all");
   const [shutdownFilter, setShutdownFilter] = useState("all");
   const [idleFilter, setIdleFilter] = useState("all");
-
-  useEffect(() => {
-    Promise.all([api.getInventory(), api.getIdleVms()])
-      .then(([inventory, idle]) => {
-        setVms(inventory);
-        setIdleNames(new Set(idle.idle_vms));
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
 
   const environments = useMemo(
     () => [...new Set(vms.map((v) => v.environment))].sort(),
     [vms]
   );
 
-  if (loading) return <p>Loading VMs...</p>;
-  if (error) return <p>Failed to load VMs: {error}</p>;
+  if (loading) return <Loading label="Loading VMs..." />;
+  if (error) return <ErrorBox message={error} onRetry={retry} />;
   if (vms.length === 0)
     return <p className="muted">No VMs in inventory. Run a sync to populate it.</p>;
 

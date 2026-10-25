@@ -1,24 +1,27 @@
-import { useEffect, useState } from "react";
 import { api } from "../api";
+import { useLoader } from "../hooks/useLoader";
+import { Loading, ErrorBox } from "../Components/Status";
+import { VmStateChart, BudgetChart } from "../components/Charts";
 
+const fetchOverview = () =>
+  Promise.all([
+    api.getSpendSummary(),
+    api.getAlerts(),
+    api.getInventory(),
+    api.getIdleVms(),
+  ]).then(([budgets, alerts, vms, idle]) => ({
+    budgets,
+    alerts,
+    vms,
+    idleNames: new Set(idle.idle_vms),
+  }));
 function Overview() {
-  const [budgets, setBudgets] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading, error, retry } = useLoader(fetchOverview);
 
-  useEffect(() => {
-    Promise.all([api.getSpendSummary(), api.getAlerts()])
-      .then(([spend, alertList]) => {
-        setBudgets(spend);
-        setAlerts(alertList);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+  if (loading) return <Loading label="Loading overview..." />;
+  if (error) return <ErrorBox message={error} onRetry={retry} />;
 
-  if (loading) return <p>Loading overview...</p>;
-  if (error) return <p>Failed to load overview: {error}</p>;
+  const { budgets, alerts, vms, idleNames } = data;
 
   const active = alerts.filter((a) => !a.acknowledged);
   const stats = [
@@ -36,6 +39,24 @@ function Overview() {
     { label: "Acknowledged", value: alerts.length - active.length, tone: "" },
   ];
 
+  const isRunning = (vm) => vm.power_state?.toLowerCase().includes("running");
+  const idleCount = vms.filter((v) => idleNames.has(v.vm_name)).length;
+  const activeCount = vms.filter(
+    (v) => isRunning(v) && !idleNames.has(v.vm_name)
+  ).length;
+  const vmChartData = [
+    { name: "Active", count: activeCount, color: "#10b981" },
+    { name: "Idle", count: idleCount, color: "#f59e0b" },
+    { name: "Not running", count: vms.length - idleCount - activeCount, color: "#9ca3af" },
+  ];
+
+  const budgetChartData = budgets.map((b) => ({
+    project: b.project,
+    spend: b.current_spend,
+    limit: b.monthly_limit,
+    state: b.state,
+  }));
+
   return (
     <>
       <h2 className="section-title">Alerts</h2>
@@ -46,6 +67,11 @@ function Overview() {
             <div className="label">{s.label}</div>
           </div>
         ))}
+      </div>
+
+      <div className="chart-grid">
+        <VmStateChart data={vmChartData} />
+        {budgets.length > 0 && <BudgetChart data={budgetChartData} />}
       </div>
 
       <h2 className="section-title">Budgets</h2>

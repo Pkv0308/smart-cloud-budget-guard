@@ -1,12 +1,27 @@
 const API_BASE = "http://localhost:8000";
 
 async function request(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the backend. Check that the API is running on localhost:8000."
+    );
+  }
+
   if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`);
+    let detail = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // response had no JSON body, keep the status text
+    }
+    throw new Error(detail);
   }
   return res.json();
 }
@@ -36,6 +51,7 @@ export const api = {
 
   // automation
   recommend: () => request("/automation/recommend", { method: "POST" }),
+  getRecommendations: () => request("/automation/recommendations"),
   getAutomationLogs: () => request("/automation/logs"),
   runAutomation: (vmName, dryRun = true) =>
     request("/automation/run", {
