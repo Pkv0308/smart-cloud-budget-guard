@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from backend.app.services.vm_inventory import sync_inventory
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -18,6 +19,7 @@ scheduler = BackgroundScheduler()
 def run_monitoring_cycle():
     """One full pass: collect metrics, raise alerts, then generate recommendations."""
     steps = [
+        ("sync inventory", sync_inventory),
         ("collect metrics", collect_and_store_metrics),
         ("idle alerts", create_alert_from_idle_vms),
         ("budget alerts", create_alert_from_budget_states),

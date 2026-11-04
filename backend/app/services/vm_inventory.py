@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 #importing Resource class from models.py
 from backend.app. database.models import Resource
 from sqlalchemy import select
+from scripts.list_vms import list_vms_data
 
 
 # insert/update resources
@@ -70,3 +71,8 @@ def get_all_resources()->list[dict]:
         ]
     finally:
         db.close()
+
+def sync_inventory() -> int:
+    """Fetch VMs from Azure and upsert them into the resources table."""
+    data = list_vms_data()
+    return upsert_resources(data["items"])

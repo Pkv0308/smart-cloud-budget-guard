@@ -5,7 +5,10 @@ from backend.app.database import SessionLocal
 from backend.app. database.models import Resource,Metric
 from sqlalchemy import select
 import os
+import logging
+from azure.core.exceptions import ResourceNotFoundError
 
+logger = logging.getLogger("smart_budget_guard.metrics")
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -70,60 +73,87 @@ def get_network_bytes(resource_id : str)-> dict:
     return result
 
 
-def collect_and_store_metrics() -> int:
-    """Fetch CPU + Network metric for every VM in inventory and persist a row per VM"""
-    db=SessionLocal()
+def collect_and_store_metrics() -> dict:
+    """
+    Fetch CPU + network metrics for every VM in inventory and persist a row per VM.
+    A failure for one VM is logged and skipped; it never stops the others.
+    """
+    db = SessionLocal()
     try:
-        resources=db.query(Resource).all()
-        count=0
+        resources = db.query(Resource).all()
+        collected = 0
+        failed = 0
         for r in resources:
             if not r.resource_id:
                 continue
-            cpu=get_cpu_percent(r.resource_id)
-            network=get_network_bytes(r.resource_id)
-            metric=Metric(
-                vm_name=r.vm_name,
-                cpu_percent=cpu,
-                network_in_bytes=network["network_in_bytes"],
-                network_out_bytes=network["network_out_bytes"],
+            try:
+                cpu = get_cpu_percent(r.resource_id)
+                net = get_network_bytes(r.resource_id)
+            except ResourceNotFoundError:
+                logger.warning(
+                    "Metrics skipped for '%s': resource no longer exists in Azure.",
+                    r.vm_name,
+                )
+                failed += 1
+                continue
+            except Exception:
+                logger.exception("Metrics fetch failed for '%s'", r.vm_name)
+                failed += 1
+                continue
+
+            db.add(
+                Metric(
+                    vm_name=r.vm_name,
+                    cpu_percent=cpu,
+                    network_in_bytes=net["network_in_bytes"],
+                    network_out_bytes=net["network_out_bytes"],
+                )
             )
-            db.add(metric)
-            count+=1
+            collected += 1
         db.commit()
-        return count
+        return {"collected": collected, "failed": failed}
     finally:
         db.close()
 
+CPU_IDLE_THRESHOLD_PERCENT = 5.0
+NETWORK_IDLE_THRESHOLD_BYTES_PER_SEC = 5 * 1024  # ~3x the observed Azure background baseline
+COLLECTION_INTERVAL_SECONDS = 3600  # each sample covers one hourly collection
+IDLE_WINDOW_HOURS = 2
+MIN_SAMPLES = 2
+
+
+def is_idle(samples) -> bool:
+    """
+    Idle only if there are enough samples and EVERY sample is below both the
+    CPU threshold and the (interval-scaled) network threshold.
+    Each sample needs cpu_percent, network_in_bytes and network_out_bytes.
+    """
+    samples = list(samples)
+    if len(samples) < MIN_SAMPLES:
+        return False
+
+    network_limit = NETWORK_IDLE_THRESHOLD_BYTES_PER_SEC * COLLECTION_INTERVAL_SECONDS
+    return all(
+        s.cpu_percent is not None
+        and s.cpu_percent < CPU_IDLE_THRESHOLD_PERCENT
+        and (s.network_in_bytes or 0) + (s.network_out_bytes or 0) < network_limit
+        for s in samples
+    )
+
+
 def get_idle_vms() -> list[str]:
-    """
-    Return vm_names whose metrics over the last 2 hours are all below the
-    idle thresholds: CPU < 5% and (network_in + network_out) < 1 KB/s equivalent.
-    """
-
-    db=SessionLocal()
+    """Return names of VMs whose samples in the last IDLE_WINDOW_HOURS are all idle."""
+    db = SessionLocal()
     try:
-        cutoff=datetime.now(timezone.utc) - timedelta(hours=2)
-        rows=db.execute(select(Metric).where(Metric.recorded_at>=cutoff)).scalars().all()
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=IDLE_WINDOW_HOURS)
+        rows = db.execute(
+            select(Metric).where(Metric.recorded_at >= cutoff)
+        ).scalars().all()
 
-        by_vm :dict[str,list[Metric]]={}
+        by_vm: dict[str, list] = {}
         for row in rows:
-            by_vm.setdefault(row.vm_name,[]).append(row)
+            by_vm.setdefault(row.vm_name, []).append(row)
 
-        idle_vms=[]
-        for vm_name, metrics in by_vm.items():
-            if len(metrics)<2:
-                continue
-            NETWORK_THRESHOLD_BYTES_PER_SEC = 5*1024
-            COLLECTION_INTERVAL_SECONDS = 3600  # matches the scheduler's hourly interval
-            network_threshold = NETWORK_THRESHOLD_BYTES_PER_SEC * COLLECTION_INTERVAL_SECONDS
-            all_below_threshold=all(
-                (m.cpu_percent is not None and m.cpu_percent<5.0) and ((m.network_in_bytes or 0) + (m.network_out_bytes or 0))<network_threshold
-                for m in metrics
-            )
-
-            if all_below_threshold:
-                idle_vms.append(vm_name)
-
-        return idle_vms
+        return [vm_name for vm_name, samples in by_vm.items() if is_idle(samples)]
     finally:
         db.close()

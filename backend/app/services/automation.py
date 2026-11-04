@@ -6,21 +6,23 @@ from azure.mgmt.compute import ComputeManagementClient
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
-def is_automation_eligible(resource:Resource)->bool:
+
+def is_automation_eligible(resource: Resource) -> bool:
     """
     Hard safety gate: a VM is only eligible for automated action if it is
     explicitly tagged Environment=Development AND AutoShutdown=True.
-    Anything else — including missing tags — is excluded by default.
+    Missing or malformed tags are never eligible.
     """
-    tags=resource.tags or []
-    environment=tags.get("Environment","")
-    auto_shutdown=tags.get("AutoShutdown","")
+    tags = resource.tags
+    if not isinstance(tags, dict):
+        return False
 
-    return(
-        environment.strip().lower()=="development" and str(auto_shutdown).strip().lower()=='true'
-    )
+    environment = str(tags.get("Environment", "")).strip().lower()
+    auto_shutdown = str(tags.get("AutoShutdown", "")).strip().lower()
+    return environment == "development" and auto_shutdown == "true"
 
 def recommend()->list[dict]:
     """

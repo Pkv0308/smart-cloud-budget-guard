@@ -1,29 +1,32 @@
 from fastapi import APIRouter
-from scripts.list_vms import list_vms_data
-from backend.app. services.vm_inventory import upsert_resources,get_all_resources
-from backend.app.services.metrics import get_idle_vms
 
-router = APIRouter(prefix="/vms",tags=["vms"])
+from backend.app.schemas import IdleVmsOut, ResourceOut, SyncOut
+from backend.app.services.metrics import get_idle_vms
+from backend.app.services.vm_inventory import get_all_resources, sync_inventory
+from scripts.list_vms import list_vms_data
+
+router = APIRouter(prefix="/vms", tags=["vms"])
+
 
 @router.get("/")
 def list_vms_route():
-    """Return Azure VM list and summary for SmartBudgetGuard."""
-    data = list_vms_data()
-    return data
+    """Return live Azure VM list and summary (bypasses the database)."""
+    return list_vms_data()
 
-@router.get("/sync")
+
+@router.post("/sync", response_model=SyncOut)
 def sync_vms_route():
-    """Fetch VMs from Azure and persist them to the database"""
-    data=list_vms_data()
-    count=upsert_resources(data["items"])
-    return {"Synced: ": count}
+    """Fetch VMs from Azure and persist them to the database."""
+    return {"synced": sync_inventory()}
 
-@router.get("/inventory")
+
+@router.get("/inventory", response_model=list[ResourceOut])
 def get_inventory_route():
-    """Returns persisted VM data from the database"""
+    """Return persisted VM inventory from the database."""
     return get_all_resources()
 
-@router.get("/idle")
+
+@router.get("/idle", response_model=IdleVmsOut)
 def get_idle_vms_route():
-    """Return VM names currently flagged as idle"""
+    """Return VM names currently flagged as idle."""
     return {"idle_vms": get_idle_vms()}

@@ -6,6 +6,7 @@ from backend.app.budgets import router as budgets_router
 from backend.app.alerts import router as alerts_router
 from backend.app.automation import router as automation_router
 from fastapi.middleware.cors import CORSMiddleware
+from backend.app.errors import register_exception_handlers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +22,9 @@ app=FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+register_exception_handlers(app) 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
