@@ -172,3 +172,20 @@ as a session log — one dated entry per work session, describing what was done.
 - Made loading and error handling consistent across all four pages: friendlier API errors
 - Replaced the hourly scheduled job with `run_monitoring_cycle()` (collect metrics, idle alerts, budget alerts, recommendations)
 - Confirmed the scheduler: metric collection fails for the deleted VM (expected), but the remaining steps still ran and an idle alert was created from test metric rows without any manual call.
+
+### 3 November 2026 
+**Summary:** Backend hardened and an automated test suite added.
+- Metric collection now isolates failures per VM: a VM deleted in Azure is skipped with a single warning, other failures are logged, and the remaining VMs are still collected. The Azure SDK already retries transient errors, so no custom retry loop was written.
+- Inventory sync is now the first step of the hourly monitoring cycle, so power state, tags, and the VM list refresh automatically instead of only on a manual `POST /vms/sync`.
+- Added central error handling (`errors.py`) that keeps the existing `{"detail": "..."}` shape: readable validation errors (422), Azure failures (502), database errors (503), and a catch-all for unexpected errors (500). The catch-all is registered before the CORS middleware so the browser can still read its responses.
+- Added Pydantic response schemas (`schemas.py`) for the main endpoints and tightened budget request validation (limit above zero, thresholds between 0 and 100, non-empty project). Wiring mistakes found while applying this (an undefined `router` in `automation.py`, `POST /budgets/` reading its fields from the query string, and stacked decorators in `vms.py`) were fixed by replacing the route files with complete versions.
+- Added a pytest suite of 46 tests: 15 for the automation safety gate, 9 for budget state, 10 for the idle rule (extracted into a pure `is_idle()` function), and 12 API tests that use fake services, so they need neither PostgreSQL nor Azure.
+- The tests caught two real bugs: `is_automation_eligible()` crashed on VMs with empty or missing tags, so any non-dict tags value is now ineligible, and `POST /automation/run` was not reaching its handler, which was corrected.
+- Findings: with the database unreachable the UI waited minutes before showing an error because the engine had no connection timeout (fix: `connect_timeout` and `pool_timeout`), and sync does not remove VMs deleted in Azure, since the live listing was empty while the database still held the old row.
+
+### 4 November 2026 
+**Summary:** End-to-end integration test added; Week 9 checkpoint met. 47 tests passing.
+- Added `pytest.ini` with an `integration` marker and one integration test against the real PostgreSQL. It seeds two idle VMs (one `Development` with `AutoShutdown=True`, one `Production`) and checks that both are flagged idle and alerted, that a second pass creates no duplicate alerts, and that only the development VM is recommended. Its fixture removes its own `itest-` rows before and after, and the test is skipped if the database is unreachable.
+- Verified the suite catches regressions: forcing the safety gate to always return `True` made 13 tests fail, including the integration test, where the production VM was recommended. After reverting, all 47 tests passed with no leftover rows.
+- **Week 9 checkpoint met:** core backend tests pass and the primary flow is verified by an automated test.
+- Carried forward: stale VM handling in sync, alerts that never auto-resolve, recommendations that stay pending after a live stop, and the active-side idle check and real stop, which need a live VM. 
